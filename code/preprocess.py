@@ -9,6 +9,8 @@ import random
 import numpy as np
 from PIL import Image
 import tensorflow as tf
+from skimage.color import rgb2gray
+import cv2
 
 import hyperparameters as hp
 
@@ -71,6 +73,8 @@ class Datasets():
         # Import images
         for i, file_path in enumerate(file_list):
             img = Image.open(file_path)
+            if img.mode == 'P':
+                img = img.convert('RGBA')
             img = img.resize((hp.img_size, hp.img_size))
             img = np.array(img, dtype=np.float32)
             img /= 255.
@@ -79,6 +83,7 @@ class Datasets():
             if len(img.shape) == 2:
                 img = np.stack([img, img, img], axis=-1)
 
+            img = cv2.cvtColor(img, cv2.COLOR_BGRA2BGR)
             data_sample[i] = img
 
         # TASK 1
@@ -135,7 +140,7 @@ class Datasets():
         #       that were calculated in calc_mean_and_std() to perform
         #       the standardization.
         # =============================================================
-
+        img = cv2.cvtColor(img, cv2.COLOR_BGRA2BGR)
         img = (img - self.mean) / self.std    # replace this code
 
         # =============================================================

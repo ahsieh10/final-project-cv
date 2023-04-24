@@ -162,7 +162,6 @@ def train(model, datasets, checkpoint_path, logs_path, init_epoch):
     if ARGS.confusion:
         callback_list.append(ConfusionMatrixLogger(logs_path, datasets))
 
-    # Begin training
     model.fit(
         x=datasets.train_data,
         validation_data=datasets.test_data,
@@ -256,6 +255,7 @@ def main():
         metrics=["sparse_categorical_accuracy"])
 
     if ARGS.evaluate:
+        print(datasets.test_data[0].shape)
         test(model, datasets.test_data)
 
         # TODO: change the image path to be the image of your choice by changing

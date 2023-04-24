@@ -34,7 +34,7 @@ Sample size for calculating the mean and standard deviation of the
 training data. This many images will be randomly seleted to be read
 into memory temporarily.
 """
-preprocess_sample_size = 400
+preprocess_sample_size = 100
 
 """
 Maximum number of weight files to save to checkpoint directory. If
@@ -52,4 +52,4 @@ batch_size = 10
 """
 The number of image scene classes. Don't change this.
 """
-num_classes = 15
+num_classes = 5
