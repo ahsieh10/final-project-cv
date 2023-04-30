@@ -50,18 +50,47 @@ def detect(input_tensor, inference_count=3):
 
   return person
 
+def image_prediction(image):
+  person = detect(image)
+  embeddings = utils.get_embedding(person)
+  #print(embeddings)
+  # print(person)
+  img = utils.draw_prediction_on_image(image, person, crop_region=None, 
+                              close_figure=False, keep_input_size=True)
+  return img
+
+def live_camera_loop(): 
+  # define a video capture object
+  vid = cv2.VideoCapture(0)
+    
+  while(True):
+        
+      # Capture the video frame
+      # by frame
+      ret, frame = vid.read()
+
+      results = image_prediction(frame)
+    
+      # Display the resulting frame
+      cv2.imshow('frame', results)
+        
+      # the 'q' button is set as the
+      # quitting button you may use any
+      # desired button of your choice
+      if cv2.waitKey(1) & 0xFF == ord('q'):
+          break
+    
+  # After the loop release the cap object
+  vid.release()
+  # Destroy all the windows
+  cv2.destroyAllWindows()
 
 def main():
-  test_image_url = "../data/train/tree/00000125.jpg"
-  if len(test_image_url):
-    image = cv2.imread(test_image_url)
-    person = detect(image)
-    embeddings = utils.get_embedding(person)
-    #print(embeddings)
-    # print(person)
-    img = utils.draw_prediction_on_image(image, person, crop_region=None, 
-                                close_figure=False, keep_input_size=True)
-    cv2.imshow("window",img)
-    cv2.waitKey(0)
+  # test_image_url = "../data/train/tree/00000125.jpg"
+  # test_image = cv2.imread(test_image_url)
+  # results = image_prediction(test_image)
+  # cv2.imshow("window", results)
+  # cv2.waitKey(0)
+  live_camera_loop()
     
 main()
