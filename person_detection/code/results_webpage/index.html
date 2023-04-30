@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link href=http://fonts.googleapis.com/css?family=Nunito:300|Crimson+Text|Droid+Sans+Mono rel=stylesheet type=text/css>
+<style type="text/css">
+body {
+  margin: 0px;
+  width: 100%;
+  font-family: Crimson Text, serif;
+  background: #fcfcfc;
+}
+table td {
+  text-align: center;
+  vertical-align: middle;
+}
+h1 {
+  font-family: Nunito, sans-serif;
+  font-weight: normal;
+  font-size: 28px;
+  margin: 25px 0px 0px 0px;
+  text-transform: lowercase;
+}
+.container {
+  margin: 0px auto 0px auto;
+  width: 1160px;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+
+<center>
+<h1>Scene classification results visualization</h1>
+<img src="confusion_matrix.png">
+
+<br>
+Accuracy (mean of diagonal of confusion matrix) is 0.920
+<p>
+
+<table border=0 cellpadding=4 cellspacing=1>
+<tr>
+<th>Category name</th>
+<th>Accuracy</th>
+<th colspan=2>Sample training images</th>
+<th colspan=2>Sample true positives</th>
+<th colspan=2>False positives with true label</th>
+<th colspan=2>False negatives with wrong predicted label</th>
+</tr>
+<tr>
+<td>person</td>
+<td>0.920</td>
+<td bgcolor=LightBlue><img src="thumbnails/person_image (812).jpg" width=75 height=37></td>
+<td bgcolor=LightBlue><img src="thumbnails/person_image (598).jpg" width=75 height=75></td>
+<td bgcolor=LightGreen><img src="thumbnails/person_image (130).jpg" width=75 height=50></td>
+<td bgcolor=LightGreen><img src="thumbnails/person_image (184).jpg" width=75 height=50></td>
+<td bgcolor=LightCoral><img src="thumbnails/person_image_0134.jpg" width=75 height=50><br><small>bedroom</small></td>
+<td bgcolor=LightCoral><img src="thumbnails/person_image_0156.jpg" width=75 height=57><br><small>bedroom</small></td>
+<td bgcolor=#FFBB55><img src="thumbnails/person_image (85).jpg" width=75 height=48><br><small>bedroom</small></td>
+<td bgcolor=#FFBB55><img src="thumbnails/person_image (150).jpg" width=75 height=133><br><small>bedroom</small></td>
+</tr>
+<tr>
+<td>bedroom</td>
+<td>0.920</td>
+<td bgcolor=LightBlue><img src="thumbnails/bedroom_image_0036.jpg" width=75 height=56></td>
+<td bgcolor=LightBlue><img src="thumbnails/bedroom_image_0199.jpg" width=75 height=53></td>
+<td bgcolor=LightGreen><img src="thumbnails/bedroom_image_0095.jpg" width=75 height=56></td>
+<td bgcolor=LightGreen><img src="thumbnails/bedroom_image_0059.jpg" width=75 height=52></td>
+<td bgcolor=LightCoral><img src="thumbnails/bedroom_image (146).jpg" width=75 height=63><br><small>person</small></td>
+<td bgcolor=LightCoral><img src="thumbnails/bedroom_image (212).jpg" width=75 height=75><br><small>person</small></td>
+<td bgcolor=#FFBB55><img src="thumbnails/bedroom_image_0033.jpg" width=75 height=56><br><small>person</small></td>
+<td bgcolor=#FFBB55><img src="thumbnails/bedroom_image_0112.jpg" width=75 height=42><br><small>person</small></td>
+</tr>
+<tr>
+<th>Category name</th>
+<th>Accuracy</th>
+<th colspan=2>Sample training images</th>
+<th colspan=2>Sample true positives</th>
+<th colspan=2>False positives with true label</th>
+<th colspan=2>False negatives with wrong predicted label</th>
+</tr>
+</table>
+</center>
+
+
+</div>
+</body>
+</html>

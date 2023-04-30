@@ -23,6 +23,9 @@ from lime import lime_image
 from skimage.segmentation import mark_boundaries
 from matplotlib import pyplot as plt
 import numpy as np
+from skimage.color import rgb2gray
+import cv2
+from PIL import Image
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
@@ -67,6 +70,10 @@ def parse_args():
         help='''Skips training and evaluates on the test set once.
         You can use this to test an already trained model by loading
         its checkpoint.''')
+    parser.add_argument(
+        '--classify',
+        default='None',
+        help='''Name of an image to classify.''')
     parser.add_argument(
         '--lime-image',
         default='test/Bedroom/image_0003.jpg',
@@ -255,7 +262,7 @@ def main():
         metrics=["sparse_categorical_accuracy"])
 
     if ARGS.evaluate:
-        print(datasets.test_data[0].shape)
+        print("shape: " , datasets.test_data[0][0].shape)
         test(model, datasets.test_data)
 
         # TODO: change the image path to be the image of your choice by changing
@@ -263,6 +270,24 @@ def main():
         # i.e. python run.py --evaluate --lime-image test/Bedroom/image_003.jpg
         path = ARGS.data + os.sep + ARGS.lime_image
         LIME_explainer(model, path, datasets.preprocess_fn, timestamp)
+    elif ARGS.classify:
+        img = Image.open(ARGS.classify)
+        if img.mode == 'P':
+            img = img.convert('RGBA')
+        img = img.resize((hp.img_size, hp.img_size))
+        img = np.array(img, dtype=np.float32)
+        img /= 255.
+
+        # Grayscale -> RGB
+        if len(img.shape) == 2:
+            img = np.stack([img, img, img], axis=-1)
+
+        img = cv2.cvtColor(img, cv2.COLOR_BGRA2BGR)
+        img = np.expand_dims(img, axis=0)
+        print(img.shape)
+        pred = model.predict(img)
+        # print(np.argmax(pred))
+        print(datasets.idx_to_class[np.argmax(pred)])
     else:
         train(model, datasets, checkpoint_path, logs_path, init_epoch)
 
