@@ -72,7 +72,7 @@ def parse_args():
         its checkpoint.''')
     parser.add_argument(
         '--classify',
-        default='None',
+        default=None,
         help='''Name of an image to classify.''')
     parser.add_argument(
         '--lime-image',

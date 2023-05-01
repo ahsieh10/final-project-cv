@@ -66,12 +66,12 @@ def projSceneRecBoW(feature='placeholder', classifier='placeholder', load_vocab=
     # categories = ['Kitchen', 'Store', 'Bedroom', 'LivingRoom', 'Office',
     #        'Industrial', 'Suburb', 'InsideCity', 'TallBuilding', 'Street',
     #        'Highway', 'OpenCountry', 'Coast', 'Mountain', 'Forest']
-    categories = ['person', 'bedroom']
+    categories = ['person', 'noperson']
 
     # This list of shortened category names is used later for visualization.
     # abbr_categories = ['Kit', 'Sto', 'Bed', 'Liv', 'Off', 'Ind', 'Sub',
     #     'Cty', 'Bld', 'St', 'HW', 'OC', 'Cst', 'Mnt', 'For']
-    abbr_categories = ['per', 'bed']
+    abbr_categories = ['per', 'no']
 
     # Number of training examples per category to use. Max is 100. For
     # simplicity, we assume this is the number of test cases per category as

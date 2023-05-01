@@ -160,6 +160,8 @@ def build_vocabulary(image_paths, vocab_size, extra_credit=False):
     all_descriptors = np.zeros((1, (cpb * cpb * 9)))
     for i in progressbar(range(num_imgs), "Loading ...", num_imgs):
         image = skimage.io.imread(image_paths[i])
+        if (len(image.shape) == 3):
+            image = rgb2gray(image[:,:,:3])
         descriptor = skimage.feature.hog(image, orientations=9, pixels_per_cell=(8,8), cells_per_block=(cpb,cpb), feature_vector=True)
         feature_descriptor = descriptor.reshape(-1, (cpb * cpb * 9))
         all_descriptors = np.concatenate((all_descriptors, feature_descriptor), axis=0)
