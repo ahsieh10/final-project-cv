@@ -14,6 +14,7 @@ from person_detection_cnn.code.models import YourModel as PDModel
 from person_detection_cnn.code.preprocess import Datasets as PDDatasets
 from person_detection_cnn.code.predict import predict_label
 
+
 movenet = Movenet('movenet/lite-model_movenet_singlepose_thunder_tflite_float16_4')
 
 '''Load human detection model'''

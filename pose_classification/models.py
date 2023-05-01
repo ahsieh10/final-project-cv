@@ -1,11 +1,12 @@
 """
-For documentation of different layers, please refer to torch.nn
-https://pytorch.org/docs/stable/nn.html
+Homework 5 - CNNs
+CS1430 - Computer Vision
+Brown University
 """
 
 import tensorflow as tf
 from keras.layers import \
-       Conv2D, MaxPool2D, Dropout, Flatten, Dense, Activation
+       Conv2D, MaxPool2D, Dropout, Flatten, Dense
 
 import hyperparameters as hp
 
@@ -15,15 +16,13 @@ class YourModel(tf.keras.Model):
 
     def __init__(self):
         super(YourModel, self).__init__()
-        
-        self.optimizer = tf.keras.optimizers.Adam()
+        self.optimizer = tf.keras.optimizers.experimental.SGD(learning_rate=hp.learning_rate, momentum=hp.momentum)
 
         self.architecture = [
-              ## Add layers here separated by commas.
             Dense(256, activation='relu'),
             Dense(128, activation='relu'),
-            Dense(5, activation='softmax')
-          
+            Dense(hp.num_classes, activation='softmax')
+              ## Add layers here separated by commas.
         ]
 
     def call(self, x):
@@ -37,8 +36,8 @@ class YourModel(tf.keras.Model):
     @staticmethod
     def loss_fn(labels, predictions):
         """ Loss function for the model. """
+        
+        loss_func = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False)
+        loss = loss_func(labels, predictions)
 
-        return tf.keras.losses.SparseCategoricalCrossentropy()(labels, predictions)
-
-
-
+        return loss
