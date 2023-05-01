@@ -13,3 +13,5 @@ num_classes = 5
 momentum = 0.01
 
 max_num_weights = 5
+
+input_size = 34
