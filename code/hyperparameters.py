@@ -28,7 +28,7 @@ Resize image size for task 1. Task 3 must have an image size of 224,
 so that is hard-coded elsewhere.
 """
 img_size = 224
-
+(10, 224, 224, 3)
 """
 Sample size for calculating the mean and standard deviation of the
 training data. This many images will be randomly seleted to be read

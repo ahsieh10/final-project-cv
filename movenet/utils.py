@@ -18,7 +18,7 @@ from typing import List, Tuple
 from matplotlib import pyplot as plt
 
 import cv2
-from data import Person
+from .data import Person
 import numpy as np
 
 # map edges to a RGB color
