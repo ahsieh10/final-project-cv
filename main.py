@@ -89,8 +89,8 @@ def image_prediction(image):
   return [img, embeddings]
 
 def img_with_label(img, label: str):
-#    img_with_rect = cv2.rectangle(img, (0, 0))
-   return cv2.putText(img, label, (10, 50), fontScale=2, fontFace=cv2.FONT_HERSHEY_SIMPLEX, thickness=3, color=(0, 0, 0))
+   img_with_rect = cv2.rectangle(img, (0, 0), (300, 80), (0, 0, 0), -1)
+   return cv2.putText(img_with_rect, label, (10, 50), fontScale=2, fontFace=cv2.FONT_HERSHEY_SIMPLEX, thickness=3, color=(255, 255, 255))
 
 def live_camera_loop(): 
   # define a video capture object
