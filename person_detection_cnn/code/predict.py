@@ -25,6 +25,9 @@ def predict_label(img: Union[str, np.ndarray], model: any, datasets: Datasets):
 
     # predicting
     prediction = model.predict(image)
+    # print(prediction)
+    # print(np.argmax(prediction[0]))
+    # print(datasets.idx_to_class)
     label = datasets.idx_to_class[np.argmax(prediction[0])]
 
     return label
@@ -50,7 +53,7 @@ def determine_person(imgpath):
 
     # predicting
     prediction = model.predict(image)
-    label = datasets.idx_to_class[np.argmax(prediction[0])]
+    #label = datasets.idx_to_class[np.argmax(prediction[0])]
 
     print(label)
     if label == "0":

@@ -12,6 +12,7 @@ from lime import lime_image
 from skimage.segmentation import mark_boundaries
 from matplotlib import pyplot as plt
 import numpy as np
+import cv2
 
 def create_model():
     model = tf.keras.Sequential([

@@ -212,10 +212,8 @@ class Datasets():
             # Don't modify this
             data_gen = tf.keras.preprocessing.image.ImageDataGenerator(
                 preprocessing_function=self.preprocess_fn)
-
         # VGG must take images of size 224x224
         im_size = 224 if is_vgg else img_size
-
         classes_for_flow = None
 
         # Make sure all data generators are aligned in label indices
