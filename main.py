@@ -24,7 +24,7 @@ person_detect_model = PDModel()
 person_detect_model(tf.keras.Input(shape=(224, 224, 3)))
 person_detect_model.load_weights(person_detect_weights_path)
 
-person_detect_datasets = PDDatasets('./person_detection_cnn'+os.sep+'data'+os.sep, "TASK 1")
+person_detect_datasets = PDDatasets('./person_detection_cnn'+os.sep+'da ta'+os.sep, "TASK 1")
 
 '''Load pose classifier model'''
 
@@ -35,6 +35,11 @@ pose_model = None
 # pose_model.load_weights(pose_weights_path)
 
 pose_datasets = None
+
+def generate_data():
+   
+
+   pass
 
 def predict_pose(img_path: str):
     pass
