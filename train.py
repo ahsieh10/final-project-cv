@@ -3,7 +3,7 @@ import os
 import numpy as np
 from movenet.movenet import Movenet
 import movenet.utils as utils
-from pose_classification_2.run import train
+from pose_classification_2.run import train, evaluate
 import pandas as pd
 
 def detect(input_tensor, inference_count=3):
@@ -103,6 +103,7 @@ try:
     test_data = test_data_labels[:, :34]
     test_labels = test_data_labels[: ,34]
     train(train_data, train_labels, test_data, test_labels)
+    evaluate(test_data, test_labels)
 except:
     print("hello")
     train_data, train_label, test_data, test_label = load_data()

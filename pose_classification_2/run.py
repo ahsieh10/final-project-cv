@@ -33,7 +33,7 @@ model = create_model()
 # Display the model's architecture
 model.summary()
 
-checkpoint_path = "training_1/cp-{epoch:04d}.ckpt"
+checkpoint_path = "./training_1/cp-{epoch:04d}.ckpt"
 checkpoint_dir = os.path.dirname(checkpoint_path)
 
 batch_size = 32
