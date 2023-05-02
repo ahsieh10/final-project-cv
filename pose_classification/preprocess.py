@@ -13,6 +13,10 @@ from skimage.color import rgb2gray
 import cv2
 
 import hyperparameters as hp
+from movenet.utils import get_embedding
+from movenet.movenet import Movenet
+
+movenet = Movenet('movenet/lite-model_movenet_singlepose_thunder_tflite_float16_4')
 
 class Datasets():
     """ Class for containing the training and test sets as well as
@@ -142,10 +146,45 @@ class Datasets():
         # =============================================================
         img = cv2.cvtColor(img, cv2.COLOR_BGRA2BGR)
         img = (img - self.mean) / self.std    # replace this code
+        
 
         # =============================================================
 
         return img
+    
+    def detect(self, input_tensor, inference_count=3):
+        """Runs detection on an input image.
+
+        Args:
+            input_tensor: A [height, width, 3] Tensor of type tf.float32.
+            Note that height and width can be anything since the image will be
+            immediately resized according to the needs of the model within this
+            function.
+            inference_count: Number of times the model should run repeatly on the
+            same input image to improve detection accuracy.
+
+        Returns:
+            A Person entity detected by the MoveNet.SinglePose.
+        """
+        image_height, image_width, channel = input_tensor.shape
+
+        # Detect pose using the full input image
+        movenet.detect(input_tensor, reset_crop_region=True)
+
+        # Repeatedly using previous detection result to identify the region of
+        # interest and only croping that region to improve detection accuracy
+        for _ in range(inference_count - 1):
+            person = movenet.detect(input_tensor, 
+                                    reset_crop_region=False)
+
+        return person
+
+    def image_prediction(self, image):
+        person = self.detect(image)
+        embeddings = get_embedding(person)
+        #print(embeddings)
+        # print(person)
+        return embeddings
 
     def preprocess_fn(self, img):
         """ Preprocess function for ImageDataGenerator. """
@@ -153,8 +192,14 @@ class Datasets():
         if self.task == '3':
             img = tf.keras.applications.vgg16.preprocess_input(img)
         else:
-            img = img / 255.
-            img = self.standardize(img)
+            # img = img / 255.
+            # img = self.standardize(img)
+            # print("IMG", img)
+            img = self.image_prediction(img)
+            img = np.tile(img, (34,1))
+            img = np.stack([img, img, img], axis=-1)
+
+            print(img.shape)
         return img
 
     def custom_preprocess_fn(self, img):
@@ -215,7 +260,7 @@ class Datasets():
                 preprocessing_function=self.preprocess_fn)
 
         # VGG must take images of size 224x224
-        img_size = 224 if is_vgg else hp.img_size
+        img_size = hp.img_size
 
         classes_for_flow = None
 
@@ -226,7 +271,7 @@ class Datasets():
         # Form image data generator from directory structure
         data_gen = data_gen.flow_from_directory(
             path,
-            target_size=(img_size, img_size),
+            target_size=(34, 34),
             class_mode='sparse',
             batch_size=hp.batch_size,
             shuffle=shuffle,

@@ -6,7 +6,7 @@ from datetime import datetime
 import tensorflow as tf
 
 import hyperparameters as hp
-from models import YourModel, VGGModel
+from models import YourModel
 from preprocess import Datasets
 from skimage.transform import resize
 from tensorboard_utils import \
@@ -208,7 +208,7 @@ def main():
     datasets = Datasets(ARGS.data, ARGS.task)
 
     model = YourModel()
-    model(tf.keras.Input(shape=(hp.input_size, 1)))
+    model(tf.keras.Input(shape=(hp.input_size, hp.input_size)))
     checkpoint_path = "checkpoints" + os.sep + \
         "your_model" + os.sep + timestamp + os.sep
     logs_path = "logs" + os.sep + "your_model" + \

@@ -19,8 +19,9 @@ class YourModel(tf.keras.Model):
         self.optimizer = tf.keras.optimizers.experimental.SGD(learning_rate=hp.learning_rate, momentum=hp.momentum)
 
         self.architecture = [
-            Dense(256, activation='relu'),
+            Flatten(),
             Dense(128, activation='relu'),
+            Dense(64, activation='relu'),
             Dense(hp.num_classes, activation='softmax')
               ## Add layers here separated by commas.
         ]
