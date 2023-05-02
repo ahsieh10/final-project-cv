@@ -13,6 +13,7 @@ from movenet.movenet import Movenet
 from person_detection_cnn.code.models import YourModel as PDModel
 from person_detection_cnn.code.preprocess import Datasets as PDDatasets
 from person_detection_cnn.code.predict import predict_label
+from constants import num_to_label, label_to_num
 
 
 movenet = Movenet('movenet/lite-model_movenet_singlepose_thunder_tflite_float16_4')
@@ -28,21 +29,30 @@ person_detect_datasets = PDDatasets('./person_detection_cnn'+os.sep+'data'+os.se
 
 '''Load pose classifier model'''
 
-pose_weights_path = None
+pose_weights_path = "./pose_classification_2/best_weights.h5"
 
-pose_model = None
-# pose_model(tf.keras.Input(shape=(224, 224, 3)))
-# pose_model.load_weights(pose_weights_path)
+def create_model():
+    model = tf.keras.Sequential([
+    tf.keras.layers.Dense(256, activation='relu', input_shape=(34,)),
+    tf.keras.layers.Dense(128),
+    tf.keras.layers.Dense(5)
+    ])
 
-pose_datasets = None
+    model.compile(optimizer='adam',
+                    loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+                    metrics=[tf.keras.metrics.SparseCategoricalAccuracy()])
 
-def generate_data():
-   
+    return model
 
-   pass
+# Create a basic model instance
+pose_model = create_model()
+pose_model.load_weights(pose_weights_path)
 
-def predict_pose(img_path: str):
-    pass
+def predict_pose(embedding):
+    embedding = np.expand_dims(embedding, 0)
+    pred = pose_model.predict(embedding)
+    label = num_to_label[np.argmax(pred[0])]
+    print(label)
 
 def detect(input_tensor, inference_count=3):
   """Runs detection on an input image.
@@ -74,8 +84,6 @@ def detect(input_tensor, inference_count=3):
 def image_prediction(image):
   person = detect(image)
   embeddings = utils.get_embedding(person)
-  #print(embeddings)
-  # print(person)
   img = utils.draw_prediction_on_image(image, person, crop_region=None, 
                               close_figure=False, keep_input_size=True)
   return [img, embeddings]
@@ -88,11 +96,11 @@ def live_camera_loop():
       # Capture the video frame
       ret, frame = vid.read()
       prediction = predict_label(frame, person_detect_model, person_detect_datasets)
-      if (prediction == "1"):
+      if (True):
          # go to movenet / pose detection pipeline
-         print("PERSON")
+        #  print("PERSON")
          img, embeddings = image_prediction(frame)
-         print(embeddings)
+         predict_pose(embeddings)
 
          # feed embeddings into our pose detection model with predict label
          

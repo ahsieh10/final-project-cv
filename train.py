@@ -3,7 +3,7 @@ import os
 import numpy as np
 from movenet.movenet import Movenet
 import movenet.utils as utils
-from pose_classification_2.run import train, evaluate
+from pose_classification_2.run import train, evaluate, predict
 import pandas as pd
 
 def detect(input_tensor, inference_count=3):
@@ -41,6 +41,14 @@ label_to_num = {
     "plank": 2,
     "tree": 3,
     "warrior2": 4
+}
+
+num_to_label = {
+    0: "downdog",
+    1: "goddess",
+    2: "plank",
+    3: "tree",
+    4: "warrior2"
 }
 
 def load_data():
@@ -95,16 +103,24 @@ def data_to_csv(train_data, train_label, test_data, test_label):
     df2.to_csv("csv_data/test_data.csv", index=False)
     
 
-try:
-    train_data_labels = pd.read_csv("csv_data/train_data.csv").to_numpy()
-    test_data_labels = pd.read_csv("csv_data/test_data.csv").to_numpy()
-    train_data = train_data_labels[:, :34]
-    train_labels = train_data_labels[: ,34]
-    test_data = test_data_labels[:, :34]
-    test_labels = test_data_labels[: ,34]
-    train(train_data, train_labels, test_data, test_labels)
-    evaluate(test_data, test_labels)
-except:
-    print("hello")
-    train_data, train_label, test_data, test_label = load_data()
-    data_to_csv(train_data, train_label, test_data, test_label)
+# try:
+#     train_data_labels = pd.read_csv("csv_data/train_data.csv").to_numpy()
+#     test_data_labels = pd.read_csv("csv_data/test_data.csv").to_numpy()
+#     train_data = train_data_labels[:, :34]
+#     train_labels = train_data_labels[: ,34]
+#     test_data = test_data_labels[:, :34]
+#     test_labels = test_data_labels[: ,34]
+#     train(train_data, train_labels, test_data, test_labels)
+#     evaluate(test_data, test_labels)
+# except:
+#     print("hello")
+#     train_data, train_label, test_data, test_label = load_data()
+#     data_to_csv(train_data, train_label, test_data, test_label)
+
+test_img_path = "./testing_images/00000000.jpg"
+img = cv2.imread(test_img_path)
+person = detect(img)
+embedding = utils.get_embedding(person)
+# prediction = np.argmax(predict(np.expand_dims(embedding, 0))[0])
+# print(prediction)
+# print(num_to_label[prediction])
