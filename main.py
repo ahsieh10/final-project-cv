@@ -52,7 +52,7 @@ def predict_pose(embedding):
     embedding = np.expand_dims(embedding, 0)
     pred = pose_model.predict(embedding)
     label = num_to_label[np.argmax(pred[0])]
-    print(label)
+    return label
 
 def detect(input_tensor, inference_count=3):
   """Runs detection on an input image.
@@ -88,6 +88,10 @@ def image_prediction(image):
                               close_figure=False, keep_input_size=True)
   return [img, embeddings]
 
+def img_with_label(img, label: str):
+#    img_with_rect = cv2.rectangle(img, (0, 0))
+   return cv2.putText(img, label, (10, 50), fontScale=2, fontFace=cv2.FONT_HERSHEY_SIMPLEX, thickness=3, color=(0, 0, 0))
+
 def live_camera_loop(): 
   # define a video capture object
   vid = cv2.VideoCapture(0)
@@ -97,10 +101,12 @@ def live_camera_loop():
       ret, frame = vid.read()
       prediction = predict_label(frame, person_detect_model, person_detect_datasets)
       if (True):
-         # go to movenet / pose detection pipeline
-        #  print("PERSON")
-         img, embeddings = image_prediction(frame)
-         predict_pose(embeddings)
+        # go to movenet / pose detection pipeline
+        # print("PERSON")
+        img, embeddings = image_prediction(frame)
+        print(img.shape)
+        label = predict_pose(embeddings)
+        img = img_with_label(img, label)
 
          # feed embeddings into our pose detection model with predict label
          
