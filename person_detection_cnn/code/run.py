@@ -61,9 +61,9 @@ def train(model, datasets, checkpoint_path, logs_path, init_epoch):
         CustomModelSaver(checkpoint_path, ARGS.task, hp.max_num_weights)
     ]
 
-    # Include confusion logger in callbacks if flag set
-    if ARGS.confusion:
-        callback_list.append(ConfusionMatrixLogger(logs_path, datasets))
+    # # Include confusion logger in callbacks if flag set
+    # if ARGS.confusion:
+    #     callback_list.append(ConfusionMatrixLogger(logs_path, datasets))
 
     # Begin training
     model.fit(
