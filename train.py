@@ -3,7 +3,7 @@ import os
 import numpy as np
 from movenet.movenet import Movenet
 import movenet.utils as utils
-from pose_classification_2.run import train, evaluate, predict
+from pose_classification_2.run import train, evaluate
 import pandas as pd
 
 def detect(input_tensor, inference_count=3):
@@ -36,19 +36,27 @@ def detect(input_tensor, inference_count=3):
   return person
 
 label_to_num = {
-    "downdog": 0,
-    "goddess": 1,
-    "plank": 2,
-    "tree": 3,
-    "warrior2": 4
+    "chair": 0,
+    "cobra": 1,
+    "downdog": 2,
+    "goddess": 3,
+    "mountain": 4,
+    "plank": 5,
+    "tree": 6,
+    "warrior": 7,
+    "warrior2": 8
 }
 
 num_to_label = {
-    0: "downdog",
-    1: "goddess",
-    2: "plank",
-    3: "tree",
-    4: "warrior2"
+    0: "chair",
+    1: "cobra",
+    2: "downdog",
+    3: "goddess",
+    4: "mountain",
+    5: "plank",
+    6: "tree",
+    7: "warrior",
+    8: "warrior2"
 }
 
 def load_data():
@@ -66,11 +74,12 @@ def load_data():
                 if img_path != '.DS_Store':
                     # print(sub_path, img_path, label)
                     img = cv2.imread(os.path.join(sub_path, img_path))
-                    label = label.strip()
-                    person = detect(img)
-                    embedding = utils.get_embedding(person)
-                    train_data += [embedding]
-                    train_labels.append(label_to_num[label])
+                    if (img is not None):
+                        label = label.strip()
+                        person = detect(img)
+                        embedding = utils.get_embedding(person)
+                        train_data += [embedding]
+                        train_labels.append(label_to_num[label])
     train_array = np.array(train_data)
     train_label_array = np.array(train_labels)
     full_path = os.path.join(absolute_path, './data/test')
@@ -81,11 +90,12 @@ def load_data():
                 if img_path != '.DS_Store':
                     # print(sub_path, img_path)
                     img = cv2.imread(os.path.join(sub_path, img_path))
-                    label = label.strip()
-                    person = detect(img)
-                    embedding = utils.get_embedding(person)
-                    test_data += [embedding]
-                    test_labels.append(label_to_num[label])
+                    if (img is not None):
+                        label = label.strip()
+                        person = detect(img)
+                        embedding = utils.get_embedding(person)
+                        test_data += [embedding]
+                        test_labels.append(label_to_num[label])
     test_array = np.array(test_data)
     test_label_array = np.array(test_labels)
     print("TRAINARRAY", train_array.shape)
@@ -98,9 +108,9 @@ def data_to_csv(train_data, train_label, test_data, test_label):
     train_data_with_labels = np.concatenate((train_data, np.expand_dims(train_label, 1)), axis=1)
     test_data_with_labels = np.concatenate((test_data, np.expand_dims(test_label, 1)), axis=1)
     df = pd.DataFrame(train_data_with_labels)
-    df.to_csv("csv_data/train_data.csv", index=False)
+    df.to_csv("csv_data/train_data_updated.csv", index=False)
     df2 = pd.DataFrame(test_data_with_labels)
-    df2.to_csv("csv_data/test_data.csv", index=False)
+    df2.to_csv("csv_data/test_data_updated.csv", index=False)
     
 
 # try:
@@ -113,14 +123,13 @@ def data_to_csv(train_data, train_label, test_data, test_label):
 #     train(train_data, train_labels, test_data, test_labels)
 #     evaluate(test_data, test_labels)
 # except:
-#     print("hello")
-#     train_data, train_label, test_data, test_label = load_data()
-#     data_to_csv(train_data, train_label, test_data, test_label)
+train_data, train_label, test_data, test_label = load_data()
+data_to_csv(train_data, train_label, test_data, test_label)
 
-test_img_path = "./testing_images/00000000.jpg"
-img = cv2.imread(test_img_path)
-person = detect(img)
-embedding = utils.get_embedding(person)
+# test_img_path = "./testing_images/00000000.jpg"
+# img = cv2.imread(test_img_path)
+# person = detect(img)
+# embedding = utils.get_embedding(person)
 # prediction = np.argmax(predict(np.expand_dims(embedding, 0))[0])
 # print(prediction)
 # print(num_to_label[prediction])

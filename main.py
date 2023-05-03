@@ -29,13 +29,13 @@ person_detect_datasets = PDDatasets('./person_detection_cnn'+os.sep+'data'+os.se
 
 '''Load pose classifier model'''
 
-pose_weights_path = "./pose_classification_2/best_weights.h5"
+pose_weights_path = "./pose_classification_2/best_weights_updated.h5"
 
 def create_model():
     model = tf.keras.Sequential([
     tf.keras.layers.Dense(256, activation='relu', input_shape=(34,)),
     tf.keras.layers.Dense(128),
-    tf.keras.layers.Dense(5)
+    tf.keras.layers.Dense(9)
     ])
 
     model.compile(optimizer='adam',
@@ -51,7 +51,11 @@ pose_model.load_weights(pose_weights_path)
 def predict_pose(embedding):
     embedding = np.expand_dims(embedding, 0)
     pred = pose_model.predict(embedding)
+    max = np.max(pred[0])
+    # if max > 5:
     label = num_to_label[np.argmax(pred[0])]
+    # else:
+    #     label = "NO POSE"
     return label
 
 def detect(input_tensor, inference_count=3):

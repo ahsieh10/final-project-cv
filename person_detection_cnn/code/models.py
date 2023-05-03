@@ -7,7 +7,7 @@ Brown University
 import tensorflow as tf
 from keras.layers import \
        Conv2D, MaxPool2D, Dropout, Flatten, Dense
-from hyperparameters import momentum, num_classes, learning_rate
+from .hyperparameters import momentum, num_classes, learning_rate
 
 
 class YourModel(tf.keras.Model):

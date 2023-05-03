@@ -47,10 +47,11 @@ def detect(input_tensor, inference_count=3):
     return person
 
 def create_model():
+    num_classes = 9
     model = tf.keras.Sequential([
     tf.keras.layers.Dense(256, activation='relu', input_shape=(34,)),
     tf.keras.layers.Dense(128),
-    tf.keras.layers.Dense(5)
+    tf.keras.layers.Dense(num_classes)
     ])
 
     model.compile(optimizer='adam',
@@ -78,7 +79,7 @@ model.summary()
 
 # model.save_weights(checkpoint_path.format(epoch=0))
 
-checkpoint_filepath = "best_weights.h5"
+checkpoint_filepath = "best_weights_updated.h5"
 cp_callback = tf.keras.callbacks.ModelCheckpoint(
     filepath=checkpoint_filepath,
     save_weights_only=True,
@@ -97,8 +98,8 @@ def train(train_data, train_labels, val_data, val_labels):
             callbacks=[cp_callback])  # Pass callback to training
 
 def model_train():
-    train_data_labels = pd.read_csv("../csv_data/train_data.csv").to_numpy()
-    test_data_labels = pd.read_csv("../csv_data/test_data.csv").to_numpy()
+    train_data_labels = pd.read_csv("../csv_data/train_data_updated.csv").to_numpy()
+    test_data_labels = pd.read_csv("../csv_data/test_data_updated.csv").to_numpy()
     train_data = train_data_labels[:, :34]
     train_labels = train_data_labels[: ,34]
     test_data = test_data_labels[:, :34]
@@ -129,10 +130,11 @@ def evaluate(val_data, val_labels):
 #     print("Restored model, accuracy: {:5.2f}%".format(100 * acc))
 
 if __name__ == "__main__":
-    test_img_path = "../testing_images/00000016.jpg"
-    img = cv2.imread(test_img_path)
-    person = detect(img)
-    embedding = np.expand_dims(get_embedding(person), 0)
-    pred = get_prediction(embedding)
-    label = num_to_label[np.argmax(pred[0])]
-    print(label)
+    model_train()
+    # test_img_path = "../testing_images/00000016.jpg"
+    # img = cv2.imread(test_img_path)
+    # person = detect(img)
+    # embedding = np.expand_dims(get_embedding(person), 0)
+    # pred = get_prediction(embedding)
+    # label = num_to_label[np.argmax(pred[0])]
+    # print(label)

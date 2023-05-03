@@ -10,7 +10,7 @@ import numpy as np
 from PIL import Image
 import tensorflow as tf
 
-from hyperparameters import img_size, num_classes, preprocess_sample_size, batch_size
+from .hyperparameters import img_size, num_classes, preprocess_sample_size, batch_size
 
 class Datasets():
     """ Class for containing the training and test sets as well as

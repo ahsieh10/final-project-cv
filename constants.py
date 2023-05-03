@@ -1,15 +1,23 @@
 label_to_num = {
-    "downdog": 0,
-    "goddess": 1,
-    "plank": 2,
-    "tree": 3,
-    "warrior2": 4
+    "chair": 0,
+    "cobra": 1,
+    "downdog": 2,
+    "goddess": 3,
+    "mountain": 4,
+    "plank": 5,
+    "tree": 6,
+    "warrior": 7,
+    "warrior2": 8
 }
 
 num_to_label = {
-    0: "downdog",
-    1: "goddess",
-    2: "plank",
-    3: "tree",
-    4: "warrior2"
+    0: "chair",
+    1: "cobra",
+    2: "downdog",
+    3: "goddess",
+    4: "mountain",
+    5: "plank",
+    6: "tree",
+    7: "warrior",
+    8: "warrior2"
 }
