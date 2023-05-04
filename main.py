@@ -19,7 +19,8 @@ from constants import num_to_label, label_to_num
 movenet = Movenet('movenet/lite-model_movenet_singlepose_thunder_tflite_float16_4')
 
 '''Load human detection model'''
-person_detect_weights_path = "./person_detection_cnn/code/checkpoints/your_model/043023-161852/your.weights.e002-acc0.9718.h5"
+# person_detect_weights_path = "./person_detection_cnn/code/checkpoints/your_model/043023-161852/your.weights.e002-acc0.9718.h5"
+person_detect_weights_path = "./person_detection_cnn/code/checkpoints/your_model/050423-180546/your.weights.e002-acc0.8320.h5"
 
 person_detect_model = PDModel()
 person_detect_model(tf.keras.Input(shape=(224, 224, 3)))
@@ -104,7 +105,7 @@ def live_camera_loop():
       # Capture the video frame
       ret, frame = vid.read()
       prediction = predict_label(frame, person_detect_model, person_detect_datasets)
-      if (True):
+      if (prediction):
         # go to movenet / pose detection pipeline
         # print("PERSON")
         img, embeddings = image_prediction(frame)

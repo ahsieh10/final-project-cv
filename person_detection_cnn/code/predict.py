@@ -35,7 +35,8 @@ def predict_label(img: Union[str, np.ndarray], model: any, datasets: Datasets):
 def determine_person(imgpath):
     '''Returns whether the image is a person or not.'''
     # loading model
-    path_to_weights = "./checkpoints/your_model/043023-161852/your.weights.e002-acc0.9718.h5"
+    # path_to_weights = "./checkpoints/your_model/043023-161852/your.weights.e002-acc0.9718.h5"
+    path_to_weights = "./checkpoints/your_model/050423-180546/your.weights.e002-acc0.8320.h5"
 
     model = YourModel()
     model(tf.keras.Input(shape=(224, 224, 3)))
@@ -53,7 +54,7 @@ def determine_person(imgpath):
 
     # predicting
     prediction = model.predict(image)
-    #label = datasets.idx_to_class[np.argmax(prediction[0])]
+    label = datasets.idx_to_class[np.argmax(prediction[0])]
 
     print(label)
     if label == "0":
