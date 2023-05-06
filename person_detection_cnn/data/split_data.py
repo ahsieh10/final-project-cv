@@ -13,7 +13,7 @@ class_0 = '0'
 class_1 = '1'
 
 # Define the train/test split ratio
-split_ratio = 0.7
+split_ratio = 0.6
 
 # Create the train and test directories if they don't already exist
 os.makedirs(os.path.join(train_dir, class_0), exist_ok=True)

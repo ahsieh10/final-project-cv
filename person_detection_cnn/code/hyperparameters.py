@@ -21,7 +21,7 @@ learning_rate = 1e-3
 """
 Momentum on the gradient (if you use a momentum-based optimizer)
 """
-momentum = 0.9
+momentum = 0.95
 
 """
 Resize image size for task 1. Task 3 must have an image size of 224,
