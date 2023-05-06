@@ -22,16 +22,16 @@ class YourModel(tf.keras.Model):
             Conv2D(32, 3, 1, padding="same", activation="relu", name="block1_conv1"),
             Conv2D(32, 3, 1, padding="same", activation="relu", name="block1_conv2"),
             MaxPool2D(2, name="block1_pool"),
-            Dropout(0.2),
+            Dropout(0.001),
             Conv2D(64, 3, 1, padding="same", activation="relu", name="block2_conv1"),
             Conv2D(64, 3, 1, padding="same", activation="relu", name="block2_conv2"),
             MaxPool2D(2, name="block2_pool"),
-            Dropout(0.2),
+            Dropout(0.001),
             Flatten(),
             Dense(64, activation="relu", name="dense1"),
-            Dropout(0.1),
+            Dropout(0.01),
             Dense(64, activation="relu", name="dense2"),
-            Dropout(0.1),
+            Dropout(0.05),
             Dense(num_classes, activation="softmax", name="dense3")
         ]
 
@@ -102,11 +102,11 @@ class VGGModel(tf.keras.Model):
         self.head = [
             Flatten(),
             Dense(128, activation="relu", name="dense1"),
-            Dropout(0.2),
+            Dropout(0.01),
             Dense(128, activation="relu", name="dense2"),
-            Dropout(0.2),
+            Dropout(0.05),
             Dense(128, activation="relu", name="dense3"),
-            Dropout(0.2),
+            Dropout(0.1),
             Dense(num_classes, activation="softmax", name="dense4")
         ]
 

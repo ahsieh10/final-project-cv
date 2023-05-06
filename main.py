@@ -11,6 +11,7 @@ import movenet.utils as utils
 from movenet.data import BodyPart
 from movenet.movenet import Movenet
 from person_detection_cnn.code.models import YourModel as PDModel
+from person_detection_cnn.code.models import VGGModel as PDVGG
 from person_detection_cnn.code.preprocess import Datasets as PDDatasets
 from person_detection_cnn.code.predict import predict_label
 from constants import num_to_label, label_to_num
@@ -19,12 +20,18 @@ from constants import num_to_label, label_to_num
 movenet = Movenet('movenet/lite-model_movenet_singlepose_thunder_tflite_float16_4')
 
 '''Load human detection model'''
-# person_detect_weights_path = "./person_detection_cnn/code/checkpoints/your_model/043023-161852/your.weights.e002-acc0.9718.h5"
-person_detect_weights_path = "./person_detection_cnn/code/checkpoints/your_model/050423-192920/your.weights.e008-acc0.8717.h5"
+person_detect_weights_path = "./person_detection_cnn/code/checkpoints/vgg/vgg.weights.e012-acc0.9692.h5"
+person_detect_base_path = "./person_detection_cnn/code/vgg16_imagenet.h5"
+# person_detect_weights_path = "./person_detection_cnn/code/checkpoints/your_model/your.weights.e018-acc0.8703.h5"
 
-person_detect_model = PDModel()
+person_detect_model = PDVGG()
+# person_detect_model = PDModel()
+
 person_detect_model(tf.keras.Input(shape=(224, 224, 3)))
-person_detect_model.load_weights(person_detect_weights_path)
+
+person_detect_model.vgg16.load_weights(person_detect_base_path, by_name=True)
+person_detect_model.head.load_weights(person_detect_weights_path, by_name=False)
+# person_detect_model.load_weights(person_detect_weights_path)
 
 person_detect_datasets = PDDatasets('./person_detection_cnn'+os.sep+'data'+os.sep, "TASK 1")
 

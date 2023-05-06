@@ -4,6 +4,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 **/.DS_Store
+person_detection_cnn/data
 
 # C extensions
 *.so
