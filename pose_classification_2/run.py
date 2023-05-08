@@ -79,13 +79,14 @@ model.summary()
 
 # model.save_weights(checkpoint_path.format(epoch=0))
 
-checkpoint_filepath = "best_weights_updated.h5"
+checkpoint_filepath = "best_weights_testing.h5"
 cp_callback = tf.keras.callbacks.ModelCheckpoint(
     filepath=checkpoint_filepath,
     save_weights_only=True,
     monitor='val_sparse_categorical_accuracy',
     mode='max',
     save_best_only=True)
+csv_callback = tf.keras.callbacks.CSVLogger('training_accuracies.csv', append=True)
 
 def train(train_data, train_labels, val_data, val_labels):
         
@@ -95,7 +96,7 @@ def train(train_data, train_labels, val_data, val_labels):
             epochs=50,
             batch_size=32,
             validation_data=(val_data, val_labels),
-            callbacks=[cp_callback])  # Pass callback to training
+            callbacks=[cp_callback, csv_callback])  # Pass callback to training
 
 def model_train():
     train_data_labels = pd.read_csv("../csv_data/train_data_updated.csv").to_numpy()
