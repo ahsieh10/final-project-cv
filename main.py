@@ -22,7 +22,7 @@ movenet = Movenet('movenet/lite-model_movenet_singlepose_thunder_tflite_float16_
 '''Load human detection model'''
 person_detect_vgg_weights_path = "./person_detection_cnn/code/checkpoints/vgg/vgg.weights.e012-acc0.9692.h5"
 person_detect_vgg_base_path = "./person_detection_cnn/code/vgg16_imagenet.h5"
-person_detect_weights_path = "./person_detection_cnn/code/checkpoints/your_model/050623-165444/your.weights.e043-acc0.9205.h5"
+person_detect_weights_path = "./person_detection_cnn/code/checkpoints/your_model/050723-023106/your.weights.e043-acc0.9205.h5"
 
 person_detect_vgg_model = PDVGG()
 person_detect_model = PDModel()
