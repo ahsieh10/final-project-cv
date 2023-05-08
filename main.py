@@ -20,18 +20,19 @@ from constants import num_to_label, label_to_num
 movenet = Movenet('movenet/lite-model_movenet_singlepose_thunder_tflite_float16_4')
 
 '''Load human detection model'''
-person_detect_weights_path = "./person_detection_cnn/code/checkpoints/vgg/vgg.weights.e012-acc0.9692.h5"
-person_detect_base_path = "./person_detection_cnn/code/vgg16_imagenet.h5"
-# person_detect_weights_path = "./person_detection_cnn/code/checkpoints/your_model/your.weights.e018-acc0.8703.h5"
+person_detect_vgg_weights_path = "./person_detection_cnn/code/checkpoints/vgg/vgg.weights.e012-acc0.9692.h5"
+person_detect_vgg_base_path = "./person_detection_cnn/code/vgg16_imagenet.h5"
+person_detect_weights_path = "./person_detection_cnn/code/checkpoints/your_model/050623-165444/your.weights.e043-acc0.9205.h5"
 
-person_detect_model = PDVGG()
-# person_detect_model = PDModel()
+person_detect_vgg_model = PDVGG()
+person_detect_model = PDModel()
 
+person_detect_vgg_model(tf.keras.Input(shape=(224, 224, 3)))
 person_detect_model(tf.keras.Input(shape=(224, 224, 3)))
 
-person_detect_model.vgg16.load_weights(person_detect_base_path, by_name=True)
-person_detect_model.head.load_weights(person_detect_weights_path, by_name=False)
-# person_detect_model.load_weights(person_detect_weights_path)
+person_detect_vgg_model.vgg16.load_weights(person_detect_vgg_base_path, by_name=True)
+person_detect_vgg_model.head.load_weights(person_detect_vgg_weights_path, by_name=False)
+person_detect_model.load_weights(person_detect_weights_path)
 
 person_detect_datasets = PDDatasets('./person_detection_cnn'+os.sep+'data'+os.sep, "TASK 1")
 
@@ -107,11 +108,15 @@ def img_with_label(img, label: str):
 def live_camera_loop(): 
   # define a video capture object
   vid = cv2.VideoCapture(0)
+  is_vgg_model = False
     
   while(True):
       # Capture the video frame
       ret, frame = vid.read()
-      prediction = predict_label(frame, person_detect_model, person_detect_datasets)
+      if (is_vgg_model):
+        prediction = predict_label(frame, person_detect_vgg_model, person_detect_datasets)
+      else:
+        prediction = predict_label(frame, person_detect_model, person_detect_datasets)
       print(prediction)
       if (prediction == "1"):
         # go to movenet / pose detection pipeline
@@ -130,11 +135,21 @@ def live_camera_loop():
     
       # Display the resulting frame
       cv2.imshow('frame', img)
+
+      # if cv2.waitKey(1) & 0xFF == ord('m'):
+      #   if(vgg_model):
+      #     vgg_model = False
+      #   else:
+      #     vgg_model = True
         
       # the 'q' button is set as the
       # quitting button you may use any
       # desired button of your choice
-      if cv2.waitKey(1) & 0xFF == ord('q'):
+      pressed = cv2.waitKey(1) & 0xFF 
+      if pressed == ord("m"):
+        is_vgg_model = not is_vgg_model
+        print(is_vgg_model)
+      elif pressed == ord("q"):
           break
     
   # After the loop release the cap object
