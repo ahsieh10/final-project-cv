@@ -2,10 +2,8 @@ from datetime import datetime
 import tensorflow as tf
 import pandas as pd
 
-from matplotlib import pyplot as plt
 from movenet.movenet import Movenet
 from movenet.utils import get_embedding
-from util.constants import num_to_label, label_to_num
 
 def detect(input_tensor, inference_count=3):
     """Runs detection on an input image.
