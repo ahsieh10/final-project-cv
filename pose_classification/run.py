@@ -1,251 +1,100 @@
-import os
-import sys
-import argparse
-import re
 from datetime import datetime
 import tensorflow as tf
+import pandas as pd
 
-import hyperparameters as hp
-from models import YourModel
-from preprocess import Datasets
-from skimage.transform import resize
-from tensorboard_utils import \
-        ImageLabelingLogger, ConfusionMatrixLogger, CustomModelSaver
-
-from skimage.io import imread
-from lime import lime_image
-from skimage.segmentation import mark_boundaries
 from matplotlib import pyplot as plt
-import numpy as np
+from movenet.movenet import Movenet
+from movenet.utils import get_embedding
+from util.constants import num_to_label, label_to_num
 
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+def detect(input_tensor, inference_count=3):
+    """Runs detection on an input image.
 
+    Args:
+        input_tensor: A [height, width, 3] Tensor of type tf.float32.
+        Note that height and width can be anything since the image will be
+        immediately resized according to the needs of the model within this
+        function.
+        inference_count: Number of times the model should run repeatly on the
+        same input image to improve detection accuracy.
 
-def parse_args():
-    """ Perform command-line argument parsing. """
-
-    parser = argparse.ArgumentParser(
-        description="Let's train some neural nets!",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument(
-        '--task',
-        required=True,
-        choices=['1', '3'],
-        help='''Which task of the assignment to run -
-        training from scratch (1), or fine tuning VGG-16 (3).''')
-    parser.add_argument(
-        '--data',
-        default='..'+os.sep+'data'+os.sep,
-        help='Location where the dataset is stored.')
-    parser.add_argument(
-        '--load-vgg',
-        default='vgg16_imagenet.h5',
-        help='''Path to pre-trained VGG-16 file (only applicable to
-        task 3).''')
-    parser.add_argument(
-        '--load-checkpoint',
-        default=None,
-        help='''Path to model checkpoint file (should end with the
-        extension .h5). Checkpoints are automatically saved when you
-        train your model. If you want to continue training from where
-        you left off, this is how you would load your weights.''')
-    parser.add_argument(
-        '--confusion',
-        action='store_true',
-        help='''Log a confusion matrix at the end of each
-        epoch (viewable in Tensorboard). This is turned off
-        by default as it takes a little bit of time to complete.''')
-    parser.add_argument(
-        '--evaluate',
-        action='store_true',
-        help='''Skips training and evaluates on the test set once.
-        You can use this to test an already trained model by loading
-        its checkpoint.''')
-    parser.add_argument(
-        '--lime-image',
-        default='test/Bedroom/image_0003.jpg',
-        help='''Name of an image in the dataset to use for LIME evaluation.''')
-
-    return parser.parse_args()
-
-
-def LIME_explainer(model, path, preprocess_fn, timestamp):
+    Returns:
+        A Person entity detected by the MoveNet.SinglePose.
     """
-    This function takes in a trained model and a path to an image and outputs 4
-    visual explanations using the LIME model
-    """
+    image_height, image_width, channel = input_tensor.shape
 
-    save_directory = "lime_explainer_images" + os.sep + timestamp
-    if not os.path.exists("lime_explainer_images"):
-        os.mkdir("lime_explainer_images")
-    if not os.path.exists(save_directory):
-        os.mkdir(save_directory)
-    image_index = 0
+    movenet = Movenet('movenet/lite-model_movenet_singlepose_thunder_tflite_float16_4')
 
-    def image_and_mask(title, positive_only=True, num_features=5,
-                       hide_rest=True):
-        nonlocal image_index
+    # Detect pose using the full input image
+    movenet.detect(input_tensor, reset_crop_region=True)
 
-        temp, mask = explanation.get_image_and_mask(
-            explanation.top_labels[0], positive_only=positive_only,
-            num_features=num_features, hide_rest=hide_rest)
-        plt.imshow(mark_boundaries(temp / 2 + 0.5, mask))
-        plt.title(title)
+    # Repeatedly using previous detection result to identify the region of
+    # interest and only croping that region to improve detection accuracy
+    for _ in range(inference_count - 1):
+        person = movenet.detect(input_tensor, 
+                                reset_crop_region=False)
 
-        image_save_path = save_directory + os.sep + str(image_index) + ".png"
-        plt.savefig(image_save_path, dpi=300, bbox_inches='tight')
-        plt.show()
+    return person
 
-        image_index += 1
+def create_model():
+    num_classes = 9
+    model = tf.keras.Sequential([
+    tf.keras.layers.Dense(256, activation='relu', input_shape=(34,)),
+    tf.keras.layers.Dense(128),
+    tf.keras.layers.Dense(num_classes)
+    ])
 
-    # Read the image and preprocess it as before
-    image = imread(path)
-    if len(image.shape) == 2:
-        image = np.stack([image, image, image], axis=-1)
-    image = resize(image, (hp.img_size, hp.img_size, 3), preserve_range=True)
-    image = preprocess_fn(image)
-    
+    model.compile(optimizer='adam',
+                    loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+                    metrics=[tf.keras.metrics.SparseCategoricalAccuracy()])
 
-    explainer = lime_image.LimeImageExplainer()
+    return model
 
-    explanation = explainer.explain_instance(
-        image.astype('double'), model.predict, top_labels=5, hide_color=0,
-        num_samples=1000)
+# Create a basic model instance
+model = create_model()
 
-    # The top 5 superpixels that are most positive towards the class with the
-    # rest of the image hidden
-    image_and_mask("Top 5 superpixels", positive_only=True, num_features=5,
-                   hide_rest=True)
+# Display the model's architecture
+model.summary()
 
-    # The top 5 superpixels with the rest of the image present
-    image_and_mask("Top 5 with the rest of the image present",
-                   positive_only=True, num_features=5, hide_rest=False)
+checkpoint_filepath = "best_weights_testing.h5"
+cp_callback = tf.keras.callbacks.ModelCheckpoint(
+    filepath=checkpoint_filepath,
+    save_weights_only=True,
+    monitor='val_sparse_categorical_accuracy',
+    mode='max',
+    save_best_only=True)
+csv_callback = tf.keras.callbacks.CSVLogger('training_accuracies.csv', append=True)
 
-    # The 'pros and cons' (pros in green, cons in red)
-    image_and_mask("Pros(green) and Cons(red)",
-                   positive_only=False, num_features=10, hide_rest=False)
-
-    # Select the same class explained on the figures above.
-    ind = explanation.top_labels[0]
-    # Map each explanation weight to the corresponding superpixel
-    dict_heatmap = dict(explanation.local_exp[ind])
-    heatmap = np.vectorize(dict_heatmap.get)(explanation.segments)
-    plt.imshow(heatmap, cmap='RdBu', vmin=-heatmap.max(), vmax=heatmap.max())
-    plt.colorbar()
-    plt.title("Map each explanation weight to the corresponding superpixel")
-
-    image_save_path = save_directory + os.sep + str(image_index) + ".png"
-    plt.savefig(image_save_path, dpi=300, bbox_inches='tight')
-    plt.show()
-
-
-def train(model, datasets, checkpoint_path, logs_path, init_epoch):
-    """ Training routine. """
-
-    # Keras callbacks for training
-    callback_list = [
-        tf.keras.callbacks.TensorBoard(
-            log_dir=logs_path,
-            update_freq='batch',
-            profile_batch=0),
-        ImageLabelingLogger(logs_path, datasets),
-        CustomModelSaver(checkpoint_path, ARGS.task, hp.max_num_weights)
-    ]
-
-    # Include confusion logger in callbacks if flag set
-    if ARGS.confusion:
-        callback_list.append(ConfusionMatrixLogger(logs_path, datasets))
-
-    # Begin training
-    model.fit(
-        x=datasets.train_data,
-        validation_data=datasets.test_data,
-        epochs=hp.num_epochs,
-        batch_size=None,            # Required as None as we use an ImageDataGenerator; see preprocess.py get_data()
-        callbacks=callback_list,
-        initial_epoch=init_epoch,
-    )
-
-
-def test(model, test_data):
-    """ Testing routine. """
-
-    # Run model on test set
-    model.evaluate(
-        x=test_data,
-        verbose=1,
-    )
-
-
-def main():
-    """ Main function. """
-
-    time_now = datetime.now()
-    timestamp = time_now.strftime("%m%d%y-%H%M%S")
-    init_epoch = 0
-
-    # If loading from a checkpoint, the loaded checkpoint's directory
-    # will be used for future checkpoints
-    if ARGS.load_checkpoint is not None:
-        ARGS.load_checkpoint = os.path.abspath(ARGS.load_checkpoint)
-
-        # Get timestamp and epoch from filename
-        regex = r"(?:.+)(?:\.e)(\d+)(?:.+)(?:.h5)"
-        init_epoch = int(re.match(regex, ARGS.load_checkpoint).group(1)) + 1
-        timestamp = os.path.basename(os.path.dirname(ARGS.load_checkpoint))
-
-    # If paths provided by program arguments are accurate, then this will
-    # ensure they are used. If not, these directories/files will be
-    # set relative to the directory of run.py
-    if os.path.exists(ARGS.data):
-        ARGS.data = os.path.abspath(ARGS.data)
-    if os.path.exists(ARGS.load_vgg):
-        ARGS.load_vgg = os.path.abspath(ARGS.load_vgg)
-
-    # Run script from location of run.py
-    os.chdir(sys.path[0])
-
-    datasets = Datasets(ARGS.data, ARGS.task)
-
-    model = YourModel()
-    model(tf.keras.Input(shape=(hp.input_size, hp.input_size)))
-    checkpoint_path = "checkpoints" + os.sep + \
-        "your_model" + os.sep + timestamp + os.sep
-    logs_path = "logs" + os.sep + "your_model" + \
-        os.sep + timestamp + os.sep
-
-    # Print summary of model
-    model.summary()
-    
-    # Load checkpoints
-    if ARGS.load_checkpoint is not None:
-        model.load_weights(ARGS.load_checkpoint, by_name=False)
+def train(train_data, train_labels, val_data, val_labels):
         
-    # Make checkpoint directory if needed
-    if not ARGS.evaluate and not os.path.exists(checkpoint_path):
-        os.makedirs(checkpoint_path)
+    # Train the model with the new callback
+    model.fit(train_data, 
+            train_labels,  
+            epochs=50,
+            batch_size=32,
+            validation_data=(val_data, val_labels),
+            callbacks=[cp_callback, csv_callback])  # Pass callback to training
 
-    # Compile model graph
-    model.compile(
-        optimizer=model.optimizer,
-        loss=model.loss_fn,
-        metrics=["sparse_categorical_accuracy"])
+def model_train():
+    train_data_labels = pd.read_csv("./csv_data/train_data_updated.csv").to_numpy()
+    test_data_labels = pd.read_csv("./csv_data/test_data_updated.csv").to_numpy()
+    train_data = train_data_labels[:, :34]
+    train_labels = train_data_labels[: ,34]
+    test_data = test_data_labels[:, :34]
+    test_labels = test_data_labels[: ,34]
+    train(train_data, train_labels, test_data, test_labels)
 
-    if ARGS.evaluate:
-        test(model, datasets.test_data)
+def get_prediction(data):
+    model.load_weights(checkpoint_filepath)
+    prediction = model.predict(data)
+    return prediction
 
-        # TODO: change the image path to be the image of your choice by changing
-        # the lime-image flag when calling run.py to investigate
-        # i.e. python run.py --evaluate --lime-image test/Bedroom/image_003.jpg
-        path = ARGS.data + os.sep + ARGS.lime_image
-        LIME_explainer(model, path, datasets.preprocess_fn, timestamp)
-    else:
-        train(model, datasets, checkpoint_path, logs_path, init_epoch)
+def evaluate(val_data, val_labels):
+    model.load_weights(checkpoint_filepath)
 
+    # Re-evaluate the model
+    loss, acc = model.evaluate(val_data, val_labels, verbose=2)
+    print("Restored model, accuracy: {:5.2f}%".format(100 * acc))
 
-# Make arguments global
-ARGS = parse_args()
-
-main()
-
-
+if __name__ == "__main__":
+    model_train()

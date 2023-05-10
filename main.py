@@ -2,27 +2,24 @@
 
 import cv2
 import numpy as np
-import pandas as pd
 import tensorflow as tf
 import os
-import sys
 
 import movenet.utils as utils
-from movenet.data import BodyPart
 from movenet.movenet import Movenet
-from person_detection_cnn.code.models import YourModel as PDModel
-from person_detection_cnn.code.models import VGGModel as PDVGG
-from person_detection_cnn.code.preprocess import Datasets as PDDatasets
-from person_detection_cnn.code.predict import predict_label
-from constants import num_to_label, label_to_num
+from person_detection.code.models import YourModel as PDModel
+from person_detection.code.models import VGGModel as PDVGG
+from person_detection.code.preprocess import Datasets as PDDatasets
+from person_detection.code.predict import predict_label
+from util.constants import num_to_label
 
 
 movenet = Movenet('movenet/lite-model_movenet_singlepose_thunder_tflite_float16_4')
 
 '''Load human detection model'''
-person_detect_vgg_weights_path = "./person_detection_cnn/code/checkpoints/vgg/vgg.weights.e012-acc0.9692.h5"
-person_detect_vgg_base_path = "./person_detection_cnn/code/vgg16_imagenet.h5"
-person_detect_weights_path = "./person_detection_cnn/code/checkpoints/your_model/050723-023106/your.weights.e043-acc0.9205.h5"
+person_detect_vgg_weights_path = "./person_detection/code/checkpoints/vgg/vgg.weights.e012-acc0.9692.h5"
+person_detect_vgg_base_path = "./person_detection/code/vgg16_imagenet.h5"
+person_detect_weights_path = "./person_detection/code/checkpoints/your_model/your.weights.e043-acc0.9205.h5"
 
 person_detect_vgg_model = PDVGG()
 person_detect_model = PDModel()
@@ -34,11 +31,11 @@ person_detect_vgg_model.vgg16.load_weights(person_detect_vgg_base_path, by_name=
 person_detect_vgg_model.head.load_weights(person_detect_vgg_weights_path, by_name=False)
 person_detect_model.load_weights(person_detect_weights_path)
 
-person_detect_datasets = PDDatasets('./person_detection_cnn'+os.sep+'data'+os.sep, "TASK 1")
+person_detect_datasets = PDDatasets('./person_detection'+os.sep+'data'+os.sep, "TASK 1")
 
 '''Load pose classifier model'''
 
-pose_weights_path = "./pose_classification_2/best_weights_updated.h5"
+pose_weights_path = "./pose_classification/weights/best_weights_updated.h5"
 
 def create_model():
     model = tf.keras.Sequential([
@@ -60,11 +57,7 @@ pose_model.load_weights(pose_weights_path)
 def predict_pose(embedding):
     embedding = np.expand_dims(embedding, 0)
     pred = pose_model.predict(embedding)
-    max = np.max(pred[0])
-    # if max > 5:
     label = num_to_label[np.argmax(pred[0])]
-    # else:
-    #     label = "NO POSE"
     return label
 
 def detect(input_tensor, inference_count=3):
@@ -135,12 +128,6 @@ def live_camera_loop():
     
       # Display the resulting frame
       cv2.imshow('frame', img)
-
-      # if cv2.waitKey(1) & 0xFF == ord('m'):
-      #   if(vgg_model):
-      #     vgg_model = False
-      #   else:
-      #     vgg_model = True
         
       # the 'q' button is set as the
       # quitting button you may use any
@@ -158,10 +145,6 @@ def live_camera_loop():
   cv2.destroyAllWindows()
 
 def main():
-#   test_image_url = "./data/test/downdog/00000002.jpg"
-#   prediction = predict_label(test_image_url, person_detect_model, person_detect_datasets)
-#   print(prediction)
-
   live_camera_loop()
     
 main()

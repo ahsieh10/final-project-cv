@@ -1,11 +1,8 @@
-# /data
-
 __pycache__/
 *.py[cod]
 *$py.class
 **/.DS_Store
-# person_detection_cnn/data
-person_detection_cnn/data/.DS_Store~Stashed changes
+person_detection/data/.DS_Store~Stashed changes
 
 # C extensions
 *.so
